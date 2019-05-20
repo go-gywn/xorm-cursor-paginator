@@ -1,17 +1,14 @@
-gorm-cursor-paginator
-[![Build Status](https://travis-ci.org/pilagod/gorm-cursor-paginator.svg?branch=master)](https://travis-ci.org/pilagod/gorm-cursor-paginator)
-[![Coverage Status](https://coveralls.io/repos/github/pilagod/gorm-cursor-paginator/badge.svg?branch=master)](https://coveralls.io/github/pilagod/gorm-cursor-paginator?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/pilagod/gorm-cursor-paginator)](https://goreportcard.com/report/github.com/pilagod/gorm-cursor-paginator)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6d8f88386eeb401b8804bb78f372b346)](https://app.codacy.com/app/pilagod/gorm-cursor-paginator?utm_source=github.com&utm_medium=referral&utm_content=pilagod/gorm-cursor-paginator&utm_campaign=Badge_Grade_Dashboard)
+xorm-cursor-paginator
 =====================
 
-A paginator doing cursor-based pagination based on [GORM](https://github.com/jinzhu/gorm)
+A paginator doing cursor-based pagination based on [XORM](http://xorm.io)
+Forked from gorm-cursor-paginator(https://github.com/pilagod/gorm-cursor-paginator) to use with xorm.
 
 Installation
 ------------
 
 ```sh
-go get -u github.com/pilagod/gorm-cursor-paginator
+go get -u github.com/go-gywn/xorm-cursor-paginator
 ```
 
 Usage by Example
@@ -28,12 +25,13 @@ type PagingQuery struct {
 }
 ```
 
-and a GORM model:
+and a XORM model:
 
 ```go
 type Model struct {
-    ID          uint
-    CreatedAt   time.Time
+    ID          int64     `xorm:"id int(11) pk not null autoincr"`
+    Name        string    `xorm:"name varchar(30) not null"`
+    CreatedAt   time.Time `xorm:"datetime not null created"`
 }
 ```
 
@@ -70,24 +68,25 @@ func InitModelPaginatorFrom(q PagingQuery) paginator.Paginator {
 }
 ```
 
-Then you can start to do pagination easily with GORM:
+Then you can start to do pagination easily with XORM:
 
 ```go
-func Find(db *gorm.DB, q PagingQuery) ([]Model, paginator.Cursors, error) {
+func Find(xorm *xorm.Engine, q PagingQuery) ([]Model, paginator.Cursors, error) {
     var models []Model
 
-    stmt := db.Where(/* ... other filters ... */)
-    stmt = db.Or(/* ... more other filters ... */)
+    session := xorm.NewSession()
+    session = session.Where("name = ?", "chan")
+    session = session.Where(/* ... more other filters ... */)
 
     // init paginator for Model
     p := InitModelPaginatorFrom(q)
 
-    // use GORM-like syntax to do pagination
-    result := p.Paginate(stmt, &models)
-
-    if result.Error != nil {
-        // ...
-    }
+    // use XORM-like syntax to do pagination
+	p := paginator.New()
+	if error := p.Paginate(session, &models); error != nil {
+		panic(error)
+	}
+    
     // get cursors for next iteration
     cursors := p.GetNextCursors()
 
@@ -104,11 +103,10 @@ type Cursors struct {
 }
 ```
 
-That's all ! Enjoy your paging in the GORM world :tada:
+That's all ! Enjoy your paging in the XORM world :tada:
 
 License
 -------
+© Dong-chan Sung (go-gywn), 2019-NOW
 
-© Chun-Yan Ho (pilagod), 2018-NOW
-
-Released under the [MIT License](https://github.com/pilagod/gorm-cursor-paginator/blob/master/LICENSE)
+Released under the [MIT License](https://github.com/go-gywn/xorm-cursor-paginator/blob/master/LICENSE)
