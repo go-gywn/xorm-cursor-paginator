@@ -80,16 +80,18 @@ func (p *Paginator) GetNextCursors() Cursors {
 }
 
 // Paginate paginates data
-func (p *Paginator) Paginate(session *xorm.Session, out interface{}) *xorm.Session {
+func (p *Paginator) Paginate(session *xorm.Session, out interface{}) error {
 	p.initOptions()
 
-	err := p.appendPagingQuery(session).Find(out)
-	fmt.Println(out)
+	error := p.appendPagingQuery(session).Find(out)
+	if error != nil {
+		return error
+	}
 	// out must be a pointer or gorm will panic above
-	if err == nil && reflect.ValueOf(out).Elem().Type().Kind() == reflect.Slice && reflect.ValueOf(out).Elem().Len() > 0 {
+	if reflect.ValueOf(out).Elem().Type().Kind() == reflect.Slice && reflect.ValueOf(out).Elem().Len() > 0 {
 		p.postProcess(out)
 	}
-	return session
+	return error
 }
 
 /* private */
