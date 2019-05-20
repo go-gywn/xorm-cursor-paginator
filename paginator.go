@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/go-xorm/xorm"
 	"github.com/iancoleman/strcase"
-	"github.com/jinzhu/gorm"
 )
 
 type order string
@@ -80,15 +80,16 @@ func (p *Paginator) GetNextCursors() Cursors {
 }
 
 // Paginate paginates data
-func (p *Paginator) Paginate(stmt *gorm.DB, out interface{}) *gorm.DB {
+func (p *Paginator) Paginate(session *xorm.Session, out interface{}) *xorm.Session {
 	p.initOptions()
 
-	result := p.appendPagingQuery(stmt).Find(out)
+	err := p.appendPagingQuery(session).Find(out)
+	fmt.Println(out)
 	// out must be a pointer or gorm will panic above
-	if reflect.ValueOf(out).Elem().Type().Kind() == reflect.Slice && reflect.ValueOf(out).Elem().Len() > 0 {
+	if err == nil && reflect.ValueOf(out).Elem().Type().Kind() == reflect.Slice && reflect.ValueOf(out).Elem().Len() > 0 {
 		p.postProcess(out)
 	}
-	return result
+	return session
 }
 
 /* private */
@@ -105,7 +106,7 @@ func (p *Paginator) initOptions() {
 	}
 }
 
-func (p *Paginator) appendPagingQuery(stmt *gorm.DB) *gorm.DB {
+func (p *Paginator) appendPagingQuery(session *xorm.Session) *xorm.Session {
 	var cursors []interface{}
 
 	if p.hasAfterCursor() {
@@ -114,15 +115,15 @@ func (p *Paginator) appendPagingQuery(stmt *gorm.DB) *gorm.DB {
 		cursors = p.decode(p.beforeCursor)
 	}
 	if len(cursors) > 0 {
-		stmt = stmt.Where(
+		session = session.Where(
 			p.getCursorQueryTemplate(p.getOperator()),
 			p.getCursorQueryArgs(cursors)...,
 		)
 	}
-	stmt = stmt.Limit(p.limit + 1)
-	stmt = stmt.Order(p.getOrder())
+	session = session.Limit(p.limit + 1)
+	session = session.OrderBy(p.getOrder())
 
-	return stmt
+	return session
 }
 
 func (p *Paginator) hasAfterCursor() bool {

@@ -9,8 +9,9 @@ import (
 	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/go-sql-driver/mysql" // for xorm
+	"github.com/go-xorm/core"
+	"github.com/go-xorm/xorm"
 )
 
 func assertEqual(t *testing.T, caseInfo interface{}, got, expected interface{}) {
@@ -35,20 +36,21 @@ func TestInitOptions(t *testing.T) {
 	}
 }
 
-func mockDB() (sqlmock.Sqlmock, *gorm.DB) {
-	db, mock, err := sqlmock.New()
+func mockDB() (sqlmock.Sqlmock, *xorm.Session) {
+	_, mock, err := sqlmock.New()
 
 	if err != nil {
 		log.Fatalf("can not create sqlmock: %s", err)
 	}
-	gormDB, gerr := gorm.Open("postgres", db)
+	xorm, gerr := xorm.NewEngine("mysql", "root@/go_paging?charset=utf8")
+	session := xorm.NewSession()
 
 	if gerr != nil {
-		log.Fatalf("can not open gorm connection: %s", err)
+		log.Fatalf("can not open xorm connection: %s", err)
 	}
-	gormDB.LogMode(true)
+	xorm.SetLogLevel(core.LOG_DEBUG)
 
-	return mock, gormDB
+	return mock, session
 }
 
 type Dummy struct {
