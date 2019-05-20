@@ -38,7 +38,7 @@ You can simply build up a cursor paginator from the PagingQuery like:
 
 ```go
 import (
-    paginator "github.com/pilagod/gorm-cursor-paginator"
+    paginator "github.com/go-gywn/xorm-cursor-paginator"
 )
 
 func InitModelPaginatorFrom(q PagingQuery) paginator.Paginator {
