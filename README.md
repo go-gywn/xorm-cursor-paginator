@@ -1,8 +1,7 @@
 xorm-cursor-paginator
 =====================
 
-A paginator doing cursor-based pagination based on [XORM](http://xorm.io)
-Forked from gorm-cursor-paginator(https://github.com/pilagod/gorm-cursor-paginator) to use with xorm.
+A paginator doing cursor-based pagination based on [XORM](http://xorm.io), which Forked from gorm-cursor-paginator(https://github.com/pilagod/gorm-cursor-paginator) to use with xorm.
 
 Installation
 ------------
@@ -39,7 +38,7 @@ You can simply build up a cursor paginator from the PagingQuery like:
 
 ```go
 import (
-    paginator "github.com/pilagod/gorm-cursor-paginator"
+    paginator "github.com/go-gywn/xorm-cursor-paginator"
 )
 
 func InitModelPaginatorFrom(q PagingQuery) paginator.Paginator {
