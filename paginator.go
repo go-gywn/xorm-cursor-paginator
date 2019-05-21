@@ -80,10 +80,10 @@ func (p *Paginator) GetNextCursors() Cursors {
 }
 
 // Paginate paginates data
-func (p *Paginator) Paginate(session *xorm.Session, out interface{}) error {
+func (p *Paginator) Paginate(session *xorm.Session, out interface{}, condiBean ...interface{}) error {
 	p.initOptions()
 
-	error := p.appendPagingQuery(session).Find(out)
+	error := p.appendPagingQuery(session).Find(out, condiBean...)
 	if error != nil {
 		return error
 	}
